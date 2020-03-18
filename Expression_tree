@@ -1,0 +1,185 @@
+// Java program to construct an expression tree 
+  
+import java.io.BufferedReader;
+import java.util.Scanner;
+import java.util.Stack; 
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
+  
+// Java program for expression tree 
+class Node { 
+  
+    String value; 
+    Node left, right; 
+  
+    Node(String item) { 
+        value = item; 
+        left = right = null; 
+    } 
+} 
+  
+class test1 { 
+	String sbuf = new String(); 
+	 Node makeTree(char tokens[]) { 
+	     Stack<Node> st = new Stack(); 
+	     Node t;
+	     char t1, t2; 
+	     
+	 	Stack<Integer> values = new Stack<Integer>(); 
+	 	Stack<Character> ops = new Stack<Character>();
+	     
+	     for (int i = 0; i < tokens.length; i++) 
+			{ 
+	    	 if (tokens[i] == ' ') 
+					continue; 
+
+				
+				if (tokens[i] >= '0' && tokens[i] <= '9') 
+				{ 
+					StringBuffer sbuf = new StringBuffer(); 
+					
+					while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') 
+						sbuf.append(tokens[i++]); 
+					values.push(Integer.parseInt(sbuf.toString())); 
+				} 
+				else if (tokens[i] == '+' || tokens[i] == '-' || 
+						tokens[i] == '*' || tokens[i] == '/') 
+				{ 
+					 
+					 
+					 if(ops.size()==0){
+						 ops.push(tokens[i]);
+						 if (tokens[i=i+2] >= '0' && tokens[i] <= '9') 
+							{ 
+								StringBuffer sbuf = new StringBuffer(); 
+								
+								while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') 
+									sbuf.append(tokens[i++]); 
+								values.push(Integer.parseInt(sbuf.toString())); 
+							}	
+								char operator=ops.pop();
+								t = new Node(Character.toString(operator)); 
+								int x=values.pop();
+								int y=values.pop();
+								
+
+					             t.right = new Node(Integer.toString(x)); 
+					             t.left = new Node(Integer.toString(y)); 
+					             st.push(t); 
+					             ops.push(operator);
+							
+						 
+					 }
+					 else{
+						 if(hasPrecedence(ops.peek(),tokens[i])){
+							 ops.push(tokens[i]);
+							 if (tokens[i=i+2] >= '0' && tokens[i] <= '9') 
+								{ 	
+									StringBuffer sbuf = new StringBuffer(); 
+									
+									while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') 
+										sbuf.append(tokens[i++]); 
+									values.push(Integer.parseInt(sbuf.toString())); 
+								}
+							 
+								Node a=st.pop();
+								
+								char operator=ops.pop();
+								t = new Node(Character.toString(operator)); 
+								int x=values.pop();
+								
+								  
+					              
+
+					             t.right = new Node(Integer.toString(x)); 
+					             t.left = a.right; 
+					             
+					             a.right=t;
+					             
+					             st.push(a); 
+					             ops.push(operator);
+								
+						 }
+						 else{
+							 ops.push(tokens[i]);
+							 if (tokens[i=i+2] >= '0' && tokens[i] <= '9') 
+								{ 
+									StringBuffer sbuf = new StringBuffer(); 
+									
+									while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') 
+										sbuf.append(tokens[i++]); 
+									values.push(Integer.parseInt(sbuf.toString())); 
+								}
+							 
+								Node a=st.pop();
+								char operator=ops.pop();
+								t = new Node(Character.toString(operator)); 
+								int x=values.pop();
+								
+								     
+					             
+
+					             t.right = new Node(Integer.toString(x)); 
+					             t.left = a;
+					             st.push(t); 
+					             ops.push(operator);
+						 }
+							 
+					 }
+				} 
+			}
+	     
+	     
+	     t = st.peek(); 
+	     st.pop(); 
+
+	     return t; 
+	 
+	 }
+	 public static boolean hasPrecedence(char op1, char op2) 
+		{ 
+		/*	if (op2 == '(' || op2 == ')') 
+				return false; */
+			/*if ((op1 == '*' || op1 == '/') && (op2 == '+' || op2 == '-')) 
+				return false;*/ 
+			if ((op2 == '*' || op2 == '/') && (op1 == '+' || op1 == '-')) 
+				return true;
+			else
+				return false; 
+		} 
+
+		// A utility method to apply an operator 'op' on operands 'a' 
+		// and 'b'. Return the result. 
+		
+		
+		 String inorder(Node t) { 
+			
+		     if (t != null) { 
+		         inorder(t.left); 
+		         sbuf=sbuf+t.value; 
+		         System.out.print(t.value + " "); 
+		         inorder(t.right); 
+		     }
+		     return sbuf;
+		 } 
+  
+    
+    public static void main(String args[]) throws ScriptException { 
+  
+        test1 et = new test1(); 
+        String expn = "100 * 2 + 12  / 14"; 
+        char[] charArray = expn.toCharArray(); 
+        Node root = et.makeTree(charArray); 
+        System.out.println("infix expression is"); 
+        Scanner br= new Scanner(System.in);
+        String evaluation=et.inorder(root); 
+        System.out.println(evaluation); 
+        ScriptEngineManager mgr=new ScriptEngineManager();
+    	ScriptEngine engine=mgr.getEngineByName("JavaScript");
+        System.out.println(engine.eval(evaluation)); 
+  
+    } 
+} 
