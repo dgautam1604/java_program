@@ -1,0 +1,680 @@
+// Java program to construct an expression tree 
+
+import java.io.BufferedReader;
+import java.util.Scanner;
+import java.util.Stack;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
+// Java program for expression tree 
+class Node {
+
+	String value;
+	Node left, right;
+
+	Node(String item) {
+		value = item;
+		left = right = null;
+	}
+}
+
+class test1 {
+	String sbuf = new String();
+
+	Node makeTree(char tokens[]) {
+		Stack<Node> st = new Stack();
+		Node t;
+		char t1, t2;
+
+		Stack<Double> values = new Stack<Double>();
+		Stack<Character> ops = new Stack<Character>();
+
+		for (int i = 0; i < tokens.length; i++) {
+			if (tokens[i] == ' ')
+				continue;
+
+			if (tokens[i] >= '0' && tokens[i] <= '9') {
+				StringBuffer sbuf = new StringBuffer();
+
+				while (i < tokens.length && tokens[i] >= '0'
+						&& tokens[i] <= '9' || tokens[i] == '.')
+					sbuf.append(tokens[i++]);
+				values.push(Double.parseDouble(sbuf.toString()));
+			} else if (tokens[i] == '(') {
+
+				Stack<Node> st2 = new Stack();
+				Stack<Double> values2 = new Stack<Double>();
+				Stack<Character> ops2 = new Stack<Character>();
+				while (tokens[i = i + 2] != ')') {
+					
+					if (ops2.size() == 0) {
+
+						if (tokens[i] >= '0' && tokens[i] <= '9') {
+							StringBuffer sbuf = new StringBuffer();
+							//sbuf.append("(");
+							while (i < tokens.length && tokens[i] >= '0'
+									&& tokens[i] <= '9' || tokens[i] == '.')
+								sbuf.append(tokens[i++]);
+							values2.push(Double.parseDouble(sbuf.toString()));
+						}
+						i++;
+						ops2.push(tokens[i]);
+						if (tokens[i = i + 2] >= '0' && tokens[i] <= '9') {
+							StringBuffer sbuf = new StringBuffer();
+
+							while (i < tokens.length && tokens[i] >= '0'
+									&& tokens[i] <= '9' || tokens[i] == '.')
+								sbuf.append(tokens[i++]);
+							
+							values2.push(Double.parseDouble(sbuf.toString()));
+						}
+						i--;
+						char operator = ops2.pop();
+						t = new Node(Character.toString(operator));
+						Double x = values2.pop();
+						Double y = values2.pop();
+
+						t.right = new Node(Double.toString(x));
+						t.left = new Node(Double.toString(y));
+						t.left.left=new Node("(");
+						if(tokens[i = i + 2] == ')'){
+							t.right.right=new Node(")");
+							
+						}i=i-2;
+						st2.push(t);
+						ops2.push(operator);
+						
+						
+					} else {
+						if (hasPrecedence(ops2.peek(), tokens[i])) {
+							ops2.push(tokens[i]);
+							if (tokens[i = i + 2] >= '0' && tokens[i] <= '9') {
+								StringBuffer sbuf = new StringBuffer();
+
+								while (i < tokens.length && tokens[i] >= '0'
+										&& tokens[i] <= '9' || tokens[i] == '.')
+									sbuf.append(tokens[i++]);
+								values2.push(Double.parseDouble(sbuf.toString()));
+							}i--;
+
+							Node a = st2.pop();
+
+							char operator = ops2.pop();
+							t = new Node(Character.toString(operator));
+							Double x = values2.pop();
+
+							t.right = new Node(Double.toString(x));
+							if(tokens[i = i + 2] == ')'){
+								t.right.right=new Node(")");
+								
+							}i=i-2;
+							
+							t.left = a.right;
+							
+							a.right = t;
+							
+
+							st2.push(a);
+							ops2.push(operator);
+
+						} else {
+							ops2.push(tokens[i]);
+							if (tokens[i = i + 2] >= '0' && tokens[i] <= '9') {
+								StringBuffer sbuf = new StringBuffer();
+
+								while (i < tokens.length && tokens[i] >= '0'
+										&& tokens[i] <= '9' || tokens[i] == '.')
+									sbuf.append(tokens[i++]);
+								values2.push(Double.parseDouble(sbuf.toString()));
+							}i--;
+
+							Node a = st2.pop();
+							char operator = ops2.pop();
+							t = new Node(Character.toString(operator));
+							Double x = values2.pop();
+
+							t.right = new Node(Double.toString(x));
+							if(tokens[i = i + 2] == ')'){
+								t.right.right=new Node(")");
+								
+							}i=i-2;
+							t.left = a;
+							
+							st2.push(t);
+							ops2.push(operator);
+						}
+
+					}
+
+				}
+
+				Node b = st2.pop();
+				
+				ops.push(tokens[i = i + 2]);
+				if (tokens[i = i + 2] >= '0' && tokens[i] <= '9') {
+					StringBuffer sbuf = new StringBuffer();
+
+					while (i < tokens.length && tokens[i] >= '0'
+							&& tokens[i] <= '9' || tokens[i] == '.')
+						sbuf.append(tokens[i++]);
+					values.push(Double.parseDouble(sbuf.toString()));
+				}
+				char operator = ops.pop();
+				t = new Node(Character.toString(operator));
+				Double x = values.pop();
+
+				t.right = new Node(Double.toString(x));
+				t.left = b;
+				st.push(t);
+				ops.push(operator);
+
+			}
+
+			else if (tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*'
+					|| tokens[i] == '/') {
+				int count = 0;
+				if (ops.size() == 0) {
+					ops.push(tokens[i]);
+					Node c=new Node(null);
+					if (tokens[i = i + 2] >= '0' && tokens[i] <= '9') {
+						StringBuffer sbuf = new StringBuffer();
+
+						while (i < tokens.length && tokens[i] >= '0'
+								&& tokens[i] <= '9' || tokens[i] == '.')
+							sbuf.append(tokens[i++]);
+						values.push(Double.parseDouble(sbuf.toString()));
+					} else if (tokens[i] == '(') {
+
+						Stack<Node> st2 = new Stack();
+						Stack<Double> values2 = new Stack<Double>();
+						Stack<Character> ops2 = new Stack<Character>();
+						while (tokens[i = i + 2] != ')') {
+							
+							if (ops2.size() == 0) {
+
+								if (tokens[i] >= '0' && tokens[i] <= '9') {
+									StringBuffer sbuf = new StringBuffer();
+
+									while (i < tokens.length
+											&& tokens[i] >= '0'
+											&& tokens[i] <= '9'
+											|| tokens[i] == '.')
+										sbuf.append(tokens[i++]);
+									values2.push(Double.parseDouble(sbuf
+											.toString()));
+								}
+								i++;
+								ops2.push(tokens[i]);
+								if (tokens[i = i + 2] >= '0'
+										&& tokens[i] <= '9') {
+									StringBuffer sbuf = new StringBuffer();
+
+									while (i < tokens.length
+											&& tokens[i] >= '0'
+											&& tokens[i] <= '9'
+											|| tokens[i] == '.')
+										sbuf.append(tokens[i++]);
+									values2.push(Double.parseDouble(sbuf
+											.toString()));
+								}
+								i--;
+								char operator = ops2.pop();
+								t = new Node(Character.toString(operator));
+								Double x = values2.pop();
+								Double y = values2.pop();
+
+								t.right = new Node(Double.toString(x));
+								t.left = new Node(Double.toString(y));
+								t.left.left=new Node("(");
+								if(tokens[i = i + 2] == ')'){
+									t.right.right=new Node(")");
+									
+								}i=i-2;
+								st2.push(t);
+								ops2.push(operator);
+							} else {
+								if (hasPrecedence(ops2.peek(), tokens[i])) {
+									ops2.push(tokens[i]);
+									if (tokens[i = i + 2] >= '0'
+											&& tokens[i] <= '9') {
+										StringBuffer sbuf = new StringBuffer();
+
+										while (i < tokens.length
+												&& tokens[i] >= '0'
+												&& tokens[i] <= '9'
+												|| tokens[i] == '.')
+											sbuf.append(tokens[i++]);
+										values2.push(Double.parseDouble(sbuf
+												.toString()));
+									}i--;
+
+									Node a = st2.pop();
+
+									char operator = ops2.pop();
+									t = new Node(Character.toString(operator));
+									Double x = values2.pop();
+
+									t.right = new Node(Double.toString(x));
+									if(tokens[i = i + 2] == ')'){
+										t.right.right=new Node(")");
+										
+									}i=i-2;
+									t.left = a.right;
+
+									a.right = t;
+
+									st2.push(a);
+									ops2.push(operator);
+
+								} else {
+									ops2.push(tokens[i]);
+									if (tokens[i = i + 2] >= '0'
+											&& tokens[i] <= '9') {
+										StringBuffer sbuf = new StringBuffer();
+
+										while (i < tokens.length
+												&& tokens[i] >= '0'
+												&& tokens[i] <= '9'
+												|| tokens[i] == '.')
+											sbuf.append(tokens[i++]);
+										values2.push(Double.parseDouble(sbuf
+												.toString()));
+									}i--;
+
+									Node a = st2.pop();
+									char operator = ops2.pop();
+									t = new Node(Character.toString(operator));
+									Double x = values2.pop();
+
+									t.right = new Node(Double.toString(x));
+									if(tokens[i = i + 2] == ')'){
+										t.right.right=new Node(")");
+										
+									}i=i-2;
+									t.left = a;
+									st2.push(t);
+									ops2.push(operator);
+								}
+
+							}
+
+						}
+
+						c = st2.pop();
+						
+						count++;
+					}
+					char operator = ops.pop();
+					t = new Node(Character.toString(operator));
+					Double x = values.pop();
+					
+
+					
+
+					if (count == 0) {
+						Double y = values.pop();
+						t.left = new Node(Double.toString(y));
+						t.right = new Node(Double.toString(x));
+					} else {
+						t.left = new Node(Double.toString(x));
+						t.right = c;
+					}
+					st.push(t);
+					ops.push(operator);
+
+				} else {
+					if (hasPrecedence(ops.peek(), tokens[i])) {
+						ops.push(tokens[i]);
+						Node c=new Node(null);
+						if (tokens[i = i + 2] >= '0' && tokens[i] <= '9') {
+							StringBuffer sbuf = new StringBuffer();
+
+							while (i < tokens.length && tokens[i] >= '0'
+									&& tokens[i] <= '9' || tokens[i] == '.')
+								sbuf.append(tokens[i++]);
+							values.push(Double.parseDouble(sbuf.toString()));
+						}else if (tokens[i] == '(') {
+
+							Stack<Node> st2 = new Stack();
+							Stack<Double> values2 = new Stack<Double>();
+							Stack<Character> ops2 = new Stack<Character>();
+							while (tokens[i = i + 2] == ')') {
+								
+								if (ops2.size() == 0) {
+
+									if (tokens[i] >= '0' && tokens[i] <= '9') {
+										StringBuffer sbuf = new StringBuffer();
+
+										while (i < tokens.length
+												&& tokens[i] >= '0'
+												&& tokens[i] <= '9'
+												|| tokens[i] == '.')
+											sbuf.append(tokens[i++]);
+										values2.push(Double.parseDouble(sbuf
+												.toString()));
+									}
+									i++;
+									ops2.push(tokens[i]);
+									if (tokens[i = i + 2] >= '0'
+											&& tokens[i] <= '9') {
+										StringBuffer sbuf = new StringBuffer();
+
+										while (i < tokens.length
+												&& tokens[i] >= '0'
+												&& tokens[i] <= '9'
+												|| tokens[i] == '.')
+											sbuf.append(tokens[i++]);
+										values.push(Double.parseDouble(sbuf
+												.toString()));
+									}
+									char operator = ops2.pop();
+									t = new Node(Character.toString(operator));
+									Double x = values2.pop();
+									Double y = values2.pop();
+
+									t.right = new Node(Double.toString(x));
+									t.left = new Node(Double.toString(y));
+									st2.push(t);
+									ops2.push(operator);
+								} else {
+									if (hasPrecedence(ops2.peek(), tokens[i])) {
+										ops2.push(tokens[i]);
+										if (tokens[i = i + 2] >= '0'
+												&& tokens[i] <= '9') {
+											StringBuffer sbuf = new StringBuffer();
+
+											while (i < tokens.length
+													&& tokens[i] >= '0'
+													&& tokens[i] <= '9'
+													|| tokens[i] == '.')
+												sbuf.append(tokens[i++]);
+											values2.push(Double.parseDouble(sbuf
+													.toString()));
+										}i--;
+
+										Node a = st2.pop();
+
+										char operator = ops2.pop();
+										t = new Node(Character.toString(operator));
+										Double x = values2.pop();
+
+										t.right = new Node(Double.toString(x));
+										t.left = a.right;
+
+										a.right = t;
+
+										st2.push(a);
+										ops2.push(operator);
+
+									} else {
+										ops2.push(tokens[i]);
+										if (tokens[i = i + 2] >= '0'
+												&& tokens[i] <= '9') {
+											StringBuffer sbuf = new StringBuffer();
+
+											while (i < tokens.length
+													&& tokens[i] >= '0'
+													&& tokens[i] <= '9'
+													|| tokens[i] == '.')
+												sbuf.append(tokens[i++]);
+											values2.push(Double.parseDouble(sbuf
+													.toString()));
+										}i--;
+
+										Node a = st2.pop();
+										char operator = ops2.pop();
+										t = new Node(Character.toString(operator));
+										Double x = values2.pop();
+
+										t.right = new Node(Double.toString(x));
+										t.left = a;
+										st2.push(t);
+										ops2.push(operator);
+									}
+
+								}
+
+							}
+
+							c = st2.pop();
+							c.left=new Node("(");
+							c.right=new Node(")");
+							count++;
+						}
+
+						Node a = st.pop();
+
+						char operator = ops.pop();
+						t = new Node(Character.toString(operator));
+						Double x = values.pop();
+						
+						if(count==0)
+							t.right = new Node(Double.toString(x));
+						else
+							t.right=c;
+						t.left = a.right;
+
+						a.right = t;
+
+						st.push(a);
+						ops.push(operator);
+
+					} else {
+						ops.push(tokens[i]);
+						Node c=new Node(null)
+;						if (tokens[i = i + 2] >= '0' && tokens[i] <= '9') {
+							StringBuffer sbuf = new StringBuffer();
+
+							while (i < tokens.length && tokens[i] >= '0'
+									&& tokens[i] <= '9' || tokens[i] == '.')
+								sbuf.append(tokens[i++]);
+							values.push(Double.parseDouble(sbuf.toString()));
+						} else if (tokens[i] == '(') {
+
+							Stack<Node> st2 = new Stack();
+							while (tokens[i = i + 2] != ')') {
+								Stack<Double> values2 = new Stack<Double>();
+								Stack<Character> ops2 = new Stack<Character>();
+								if (ops2.size() == 0) {
+
+									if (tokens[i] >= '0' && tokens[i] <= '9') {
+										StringBuffer sbuf = new StringBuffer();
+
+										while (i < tokens.length
+												&& tokens[i] >= '0'
+												&& tokens[i] <= '9'
+												|| tokens[i] == '.')
+											sbuf.append(tokens[i++]);
+										values2.push(Double.parseDouble(sbuf
+												.toString()));
+									}
+									i++;
+									ops2.push(tokens[i]);
+									if (tokens[i = i + 2] >= '0'
+											&& tokens[i] <= '9') {
+										StringBuffer sbuf = new StringBuffer();
+
+										while (i < tokens.length
+												&& tokens[i] >= '0'
+												&& tokens[i] <= '9'
+												|| tokens[i] == '.')
+											sbuf.append(tokens[i++]);
+										values.push(Double.parseDouble(sbuf
+												.toString()));
+									}
+									char operator = ops2.pop();
+									t = new Node(Character.toString(operator));
+									Double x = values2.pop();
+									Double y = values2.pop();
+
+									t.right = new Node(Double.toString(x));
+									t.left = new Node(Double.toString(y));
+									t.left.left=new Node("(");
+									if(tokens[i = i + 2] == ')'){
+										t.right.right=new Node(")");
+										
+									}i=i-2;
+									st2.push(t);
+									ops2.push(operator);
+								} else {
+									if (hasPrecedence(ops2.peek(), tokens[i])) {
+										ops2.push(tokens[i]);
+										if (tokens[i = i + 2] >= '0'
+												&& tokens[i] <= '9') {
+											StringBuffer sbuf = new StringBuffer();
+
+											while (i < tokens.length
+													&& tokens[i] >= '0'
+													&& tokens[i] <= '9'
+													|| tokens[i] == '.')
+												sbuf.append(tokens[i++]);
+											values2.push(Double.parseDouble(sbuf
+													.toString()));
+										}i--;
+
+										Node a = st2.pop();
+
+										char operator = ops2.pop();
+										t = new Node(Character.toString(operator));
+										Double x = values2.pop();
+
+										t.right = new Node(Double.toString(x));
+										if(tokens[i = i + 2] == ')'){
+											t.right.right=new Node(")");
+											
+										}i=i-2;
+										t.left = a.right;
+
+										a.right = t;
+
+										st2.push(a);
+										ops2.push(operator);
+
+									} else {
+										ops2.push(tokens[i]);
+										if (tokens[i = i + 2] >= '0'
+												&& tokens[i] <= '9') {
+											StringBuffer sbuf = new StringBuffer();
+
+											while (i < tokens.length
+													&& tokens[i] >= '0'
+													&& tokens[i] <= '9'
+													|| tokens[i] == '.')
+												sbuf.append(tokens[i++]);
+											values2.push(Double.parseDouble(sbuf
+													.toString()));
+										}i--;
+
+										Node a = st2.pop();
+										char operator = ops2.pop();
+										t = new Node(Character.toString(operator));
+										Double x = values2.pop();
+
+										t.right = new Node(Double.toString(x));
+										if(tokens[i = i + 2] == ')'){
+											t.right.right=new Node(")");
+											
+										}i=i-2;
+										t.left = a;
+										st2.push(t);
+										ops2.push(operator);
+									}
+
+								}
+
+							}
+
+							c = st2.pop();
+							c.left=new Node("(");
+							c.right=new Node(")");
+							count++;
+							
+						}
+
+						Node a = st.pop();
+						char operator = ops.pop();
+						t = new Node(Character.toString(operator));
+						Double x = values.pop();
+						
+						if(count==0)
+							t.right = new Node(Double.toString(x));
+						else
+							t.right = c;
+						t.left = a;
+						st.push(t);
+						ops.push(operator);
+					}
+
+				}
+			}
+		}
+
+		t = st.peek();
+		st.pop();
+
+		return t;
+
+	}
+
+	public static boolean hasPrecedence(char op1, char op2) {
+		
+		if ((op2 == '*' || op2 == '/') && (op1 == '+' || op1 == '-'))
+			return true;
+		else
+			return false;
+	}
+
+	Node bracketAdder(Node t) {
+
+		if (t != null) {
+			bracketAdder(t.left);
+				sbuf = sbuf + t.value;
+			bracketAdder(t.right);
+		}
+		
+		return t;
+	}
+
+	String inorder(Node t,int counter) {
+
+		if (t != null) {
+			inorder(t.left,0);
+				sbuf = sbuf + t.value;
+			//System.out.print(t.value + " ");
+			//System.out.print(sbuf );
+			inorder(t.right,1);
+		}
+		return sbuf;
+	}
+
+	public static boolean isNumeric(String strNum) {
+	    if (strNum == null) {
+	        return false;
+	    }
+	    try {
+	        double d = Double.parseDouble(strNum);
+	    } catch (NumberFormatException nfe) {
+	        return false;
+	    }
+	    return true;
+	}
+	public static void main(String args[]) throws ScriptException {
+
+		test1 et = new test1();
+		// String expn = "100.2 * 2.2 + 12.3  / 14.4 ";
+		String expn = "2 * ( 5 + 15 / 5 ) ";
+		char[] charArray = expn.toCharArray();
+		Node root = et.makeTree(charArray);
+		System.out.println("infix expression is");
+		Scanner br = new Scanner(System.in);
+		String evaluation = et.inorder(root,0);
+		System.out.println();
+		System.out.println(evaluation);
+		ScriptEngineManager mgr = new ScriptEngineManager();
+		ScriptEngine engine = mgr.getEngineByName("JavaScript");
+		System.out.println(engine.eval(evaluation));
+
+	}
+}
